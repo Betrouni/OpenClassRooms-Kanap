@@ -1,4 +1,4 @@
-const POSTURL = 'http://localhost:3000/api/products/order';
+const POSTURL = "http://localhost:3000/api/products/order";
 let section = document.querySelector("#cart__items");
 let form = document.querySelector(".cart__order__form");
 let firstName = document.querySelector("#firstName");
@@ -8,16 +8,16 @@ let city = document.querySelector("#city");
 let email = document.getElementById("email");
 let regex = /\d/;
 
+
 class Contact {
   constructor(firstName, lastName, adress, city, email) {
     this.firstName = firstName;
-    this.lastName          = lastName;
-    this.address          = adress;
-    this.city          = city;
-    this.email          = email;
-  }}
-
-
+    this.lastName = lastName;
+    this.address = adress;
+    this.city = city;
+    this.email = email;
+  }
+}
 
 // Vérifie si un panier éxiste en localstorage, si c'est le cas return le panier
 // sinon créé un Panier vide, le set et le return
@@ -32,14 +32,25 @@ function getPanier() {
   }
 }
 
+// La func envoie une requête à l'API et return les données
+
+function getDatas() {
+  return axios
+    .get(url)
+    .then(function (response) {
+      // console.log(response.data)
+      return response.data;
+    })
+    .catch(function (erreur) {
+      alert("Un problème est survenu");
+    });
+}
+
 // Envoie le panier passé en argument en localStorage au nom de 'Panier'
 
 function setPanier(Panier) {
   localStorage.setItem("Panier", JSON.stringify(Panier));
 }
-
-
-
 
 // Divise l'objet reçu en chaque éléments à afficher et créé en HTML un produit avec les données reçues
 
@@ -154,25 +165,27 @@ section.addEventListener("input", (e) => {
   }
 });
 
-
-
-
 // return true si l'email injécté n'est pas vide et correspond au normes regex
 
 const isValidEmail = (email) => {
   const re =
     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  if (email !== "" && re.test(String(email).toLowerCase())){return true};
+  if (email !== "" && re.test(String(email).toLowerCase())) {
+    return true;
+  }
 };
 
 // return true si le champ n'est pas vide et le contient pas de chiffres
 
-function checkName(name){
-  if ((name !== '') && (! regex.test(name))){
-    return true
-  }else {alert("Les champs Nom / Prénom ne doivent pas être vide ou contenir de chiffres");}
+function checkName(name) {
+  if (name !== "" && !regex.test(name)) {
+    return true;
+  } else {
+    alert(
+      "Les champs Nom / Prénom ne doivent pas être vide ou contenir de chiffres"
+    );
+  }
 }
-
 
 // Enlève les espaces des champs et vérifie les func checkName() et isValidEmail()
 // si tout passe les test alors return true
@@ -181,7 +194,6 @@ let lastNameValue = lastName.value.trim();
 let addressValue = adress.value.trim();
 let cityValue = city.value.trim();
 let mailValue = email.value.trim();
- 
 
 function validateInputs() {
   firstNameValue = firstName.value.trim();
@@ -189,68 +201,94 @@ function validateInputs() {
   addressValue = adress.value.trim();
   cityValue = city.value.trim();
   emailValue = email.value.trim();
-  if (checkName(firstNameValue) && checkName(lastNameValue) && isValidEmail(emailValue)){
-    console.log('firstname LastName et Email sont vérifiés')
-    return true
+  if (
+    checkName(firstNameValue) &&
+    checkName(lastNameValue) &&
+    isValidEmail(emailValue)
+  ) {
+    console.log("firstname LastName et Email sont vérifiés");
+    return true;
   }
-
-
-};
-
-
-
-// const axiosInstancePost = axios.create({
-//   headers: {
-//     'Content-Type': 'application/x-www-form-urlencoded'
-//   },
-// });
-
-function postRequest(contact,products){
-  axios.post(POSTURL,{contact,products}  )
-  .then(function(donnees) {
-      console.log(donnees.data);
-  })
-  .catch(function(erreur) {
-    console.log(erreur);
-  })}
-
-
-
-
-function getPanierProductID(panierProduit){
- return panierProduit[0]._id
 }
- 
-function panierToArray(Panier){
+
+
+// post vers l'API une requête contenant un objet contact et un objet products
+// stock l'orderId retourné, l'injecte dans rootToConfirmation
+
+function postRequest(contact, products) {
+    axios
+    .post(POSTURL, { contact, products })
+    .then(function (donnees) {
+      orderNumber = donnees.data.orderId
+      rootToConfirmation(orderNumber)
+    })
+    .catch(function (erreur) {
+      console.log(erreur);
+    });
+}
+
+
+// get l'ID d'un produit 
+
+function getPanierProductID(panierProduit) {
+  return panierProduit[0]._id;
+}
+
+
+// return une liste contenant tout les ID des produits dans le panier (ce que demande l'API)
+
+function panierToArray(Panier) {
   array = [];
-  Panier.forEach(element => {
-    array.push(getPanierProductID(element))
+  Panier.forEach((element) => {
+    array.push(getPanierProductID(element));
   });
-  return array
-  
-
+  return array;
 }
 
+// redirige vers la paga confirmation en injectant un paramètre d'URL donné en input
+
+function rootToConfirmation(id) {
+  param = "?" + id
+  window.location.href = `http://127.0.0.1:5500/P5-folder/front/html/confirmation.html${param}`;
+}
+
+
+// appelle PostRequest de manière asynchrone, stock et return le numéro de commande retourné
+
+async function getOrderNumber(contact, products){
+  orderNumber = await postRequest(contact, products)
+  .then 
+  return orderNumber
+}
 
 // a l'envoie du formulaire appelle preventDefault() sur l'évenement puis vérifie si validateInputs()
+//  génère un object contacte, get le panier et appelle panierToArray, injecte les datas dans postRequest()
 
-form.addEventListener("submit", (e) => {
+form.addEventListener("submit", (e) =>  {
   e.preventDefault();
-
-  if( validateInputs()){
+ 
+  if (validateInputs()) { 
     // window.href
-    let contact = new Contact(firstNameValue,lastNameValue,addressValue,cityValue,emailValue)
-    console.log('tout est ban')
-    Panier = getPanier()
-    products = panierToArray(Panier)
-    request = [JSON.stringify(Panier), array]
-    console.log(array)
-    console.log(contact)
-    postRequest(contact,products)
+    let contact = new Contact(
+      firstNameValue,
+      lastNameValue,
+      addressValue,
+      cityValue,
+      emailValue
+    );
+    console.log("tout est ban");
+    Panier = getPanier();
+    products = panierToArray(Panier);
+    postRequest(contact, products);  
 
-  };
+    // orderNumber = getOrderNumber(contact, products);
+    
+
+    // orderNumber = postRequest(contact, products);
+    
+    
+  }
 });
-
 
 function main() {
   let Panier = getPanier();
@@ -258,11 +296,7 @@ function main() {
     displayProduct(Panier[i], i);
   }
   displayTotal();
-
-  
-
 }
 
-
-
 main();
+
