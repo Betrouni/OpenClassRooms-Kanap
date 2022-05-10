@@ -1,51 +1,13 @@
+import { getPanier } from "./methodes.js";
+import { getDatas } from "./methodes.js";
+import { setPanier } from "./methodes.js";
 
+let Panier = getPanier()
 
 let baseUrl = window.location.href; // You can also use document.URL
 let koopId = baseUrl.substring(baseUrl.lastIndexOf("=") + 1); // KoopId représente l'id qui est présent dans l'URL
 const url = "http://localhost:3000/api/products";
 let button = document.querySelector('#addToCart')
-
-
-
-
-// La func envoie une requête à l'API et return les données
-
-function getDatas() {
-  return axios
-    .get(url)
-    .then(function (response) {
-      // console.log(response.data)
-      return response.data;
-    })
-    .catch(function (erreur) {
-      alert("Un problème est survenu");
-    });
-}
-
-
-// Vérifie si un panier éxiste en localstorage, si c'est le cas return le panier
-// sinon créé un Panier vide, le set et le return
-function getPanier(){
-  if (localStorage.getItem("Panier")){
-    return JSON.parse(localStorage.getItem("Panier"))
-  }
-  else {
-    var Panier = []
-    setPanier(Panier)
-    return Panier
-  }
-}
-
-
-
-// Envoie le panier passé en argument en localStorage au nom de 'Panier'
-
-function setPanier(Panier){
-  localStorage.setItem('Panier', JSON.stringify(Panier));
-}
-
-
-
 
 
 
@@ -68,13 +30,6 @@ function displayProduct(data) {
     colorList.innerHTML += `<option value="${data[koopId].colors[i]}">${data[koopId].colors[i]}</option>`;
   }
 }
-
-
-// check si le même produit+couleur éxiste déjà dans le panier, 
-// si oui => additionner les quantité  
-
-function checkQuantity(){}
-
 
 
 
@@ -107,7 +62,7 @@ function createProduitPanier(produit,couleur,quantité){
 // En cliquant le bouton, la couleur et la quantité sont stockés et injectés dans createProduitPanier() 
 
 button.addEventListener('click',async ()=>{
-    var datas = await getDatas();
+    var datas = await getDatas(url);
     var produit = datas[koopId]
     var color = document.querySelector('#colors')
     var selectedColor = color.options[color.selectedIndex].textContent
@@ -130,7 +85,7 @@ button.addEventListener('click',async ()=>{
 // stock getDatas(), appelle createPanier() et injecte dans displayProduct() les datas
 
 async function main() {
-  const article = await getDatas();
+  const article = await getDatas(url);
   displayProduct(article);
 }
 

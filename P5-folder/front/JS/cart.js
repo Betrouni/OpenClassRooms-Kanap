@@ -1,3 +1,8 @@
+import { getPanier } from "./methodes.js";
+import { getDatas } from "./methodes.js";
+import { setPanier } from "./methodes.js";
+
+
 const POSTURL = "http://localhost:3000/api/products/order";
 let section = document.querySelector("#cart__items");
 let form = document.querySelector(".cart__order__form");
@@ -7,7 +12,7 @@ let adress = document.querySelector("#address");
 let city = document.querySelector("#city");
 let email = document.getElementById("email");
 let regex = /\d/;
-
+let Panier = getPanier()
 
 class Contact {
   constructor(firstName, lastName, adress, city, email) {
@@ -19,38 +24,8 @@ class Contact {
   }
 }
 
-// Vérifie si un panier éxiste en localstorage, si c'est le cas return le panier
-// sinon créé un Panier vide, le set et le return
 
-function getPanier() {
-  if (localStorage.getItem("Panier")) {
-    return JSON.parse(localStorage.getItem("Panier"));
-  } else {
-    var Panier = [];
-    setPanier(Panier);
-    return Panier;
-  }
-}
 
-// La func envoie une requête à l'API et return les données
-
-function getDatas() {
-  return axios
-    .get(url)
-    .then(function (response) {
-      // console.log(response.data)
-      return response.data;
-    })
-    .catch(function (erreur) {
-      alert("Un problème est survenu");
-    });
-}
-
-// Envoie le panier passé en argument en localStorage au nom de 'Panier'
-
-function setPanier(Panier) {
-  localStorage.setItem("Panier", JSON.stringify(Panier));
-}
 
 // Divise l'objet reçu en chaque éléments à afficher et créé en HTML un produit avec les données reçues
 
@@ -193,7 +168,7 @@ let firstNameValue = firstName.value.trim();
 let lastNameValue = lastName.value.trim();
 let addressValue = adress.value.trim();
 let cityValue = city.value.trim();
-let mailValue = email.value.trim();
+let emailValue = email.value.trim();
 
 function validateInputs() {
   firstNameValue = firstName.value.trim();
@@ -211,34 +186,31 @@ function validateInputs() {
   }
 }
 
-
 // post vers l'API une requête contenant un objet contact et un objet products
 // stock l'orderId retourné, l'injecte dans rootToConfirmation
 
 function postRequest(contact, products) {
-    axios
+  axios
     .post(POSTURL, { contact, products })
     .then(function (donnees) {
-      orderNumber = donnees.data.orderId
-      rootToConfirmation(orderNumber)
+      let orderNumber = donnees.data.orderId;
+      rootToConfirmation(orderNumber);
     })
     .catch(function (erreur) {
       console.log(erreur);
     });
 }
 
-
-// get l'ID d'un produit 
+// get l'ID d'un produit
 
 function getPanierProductID(panierProduit) {
   return panierProduit[0]._id;
 }
 
-
 // return une liste contenant tout les ID des produits dans le panier (ce que demande l'API)
 
 function panierToArray(Panier) {
-  array = [];
+  let array = [];
   Panier.forEach((element) => {
     array.push(getPanierProductID(element));
   });
@@ -248,26 +220,24 @@ function panierToArray(Panier) {
 // redirige vers la paga confirmation en injectant un paramètre d'URL donné en input
 
 function rootToConfirmation(id) {
-  param = "?" + id
+  let param = "?" + id;
   window.location.href = `http://127.0.0.1:5500/P5-folder/front/html/confirmation.html${param}`;
 }
 
-
 // appelle PostRequest de manière asynchrone, stock et return le numéro de commande retourné
 
-async function getOrderNumber(contact, products){
-  orderNumber = await postRequest(contact, products)
-  .then 
-  return orderNumber
+async function getOrderNumber(contact, products) {
+  orderNumber = await postRequest(contact, products).then;
+  return orderNumber;
 }
 
 // a l'envoie du formulaire appelle preventDefault() sur l'évenement puis vérifie si validateInputs()
 //  génère un object contacte, get le panier et appelle panierToArray, injecte les datas dans postRequest()
 
-form.addEventListener("submit", (e) =>  {
+form.addEventListener("submit", (e) => {
   e.preventDefault();
- 
-  if (validateInputs()) { 
+
+  if (validateInputs()) {
     // window.href
     let contact = new Contact(
       firstNameValue,
@@ -278,15 +248,12 @@ form.addEventListener("submit", (e) =>  {
     );
     console.log("tout est ban");
     Panier = getPanier();
-    products = panierToArray(Panier);
-    postRequest(contact, products);  
+    let products = panierToArray(Panier);
+    postRequest(contact, products);
 
     // orderNumber = getOrderNumber(contact, products);
-    
 
     // orderNumber = postRequest(contact, products);
-    
-    
   }
 });
 
@@ -299,4 +266,3 @@ function main() {
 }
 
 main();
-
