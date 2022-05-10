@@ -6,7 +6,6 @@ let Panier = getPanier()
 
 let baseUrl = window.location.href; // You can also use document.URL
 let koopId = baseUrl.substring(baseUrl.lastIndexOf("=") + 1); // KoopId représente l'id qui est présent dans l'URL
-const url = "http://localhost:3000/api/products";
 let button = document.querySelector('#addToCart')
 
 
@@ -44,11 +43,11 @@ function createProduitPanier(produit,couleur,quantité){
     if (~index){
       Panier[index][2] += parseInt(quantité)
       setPanier(Panier)
-      alert('La quantité du produit '+ produitPanier[0].name + 'a été ajusté à ' + Panier[index][2])
+      alert('La quantité du produit a été ajusté à ' + Panier[index][2])
     }else {
       Panier.push(produitPanier)
       setPanier(Panier)
-      alert('Le produitPanier contenant ' + quantité+ ' ' + produitPanier[0].name + ' ' + couleur +' a été stocké en localStorage')
+      alert('Le produit a été ajouté au panier ')
     }
 
     
@@ -62,8 +61,8 @@ function createProduitPanier(produit,couleur,quantité){
 // En cliquant le bouton, la couleur et la quantité sont stockés et injectés dans createProduitPanier() 
 
 button.addEventListener('click',async ()=>{
-    var datas = await getDatas(url);
-    var produit = datas[koopId]
+    var datas = await getDatas();
+    var produit = datas[koopId]._id
     var color = document.querySelector('#colors')
     var selectedColor = color.options[color.selectedIndex].textContent
     var input = document.querySelector('input').value
@@ -85,7 +84,7 @@ button.addEventListener('click',async ()=>{
 // stock getDatas(), appelle createPanier() et injecte dans displayProduct() les datas
 
 async function main() {
-  const article = await getDatas(url);
+  const article = await getDatas();
   displayProduct(article);
 }
 

@@ -21,14 +21,15 @@ export function setPanier(Panier) {
 
 // La func envoie une requête à l'API et return les données
 
-export function getDatas(url) {
+export function getDatas() {
   return axios
-    .get(url)
+    .get("http://localhost:3000/api/products")
     .then(function (response) {
       // console.log(response.data)
       return response.data;
     })
     .catch(function (erreur) {
-      alert("Un problème est survenu");
+        console.log(erreur);
+    //   alert("Un problème est survenu");
     });
 }

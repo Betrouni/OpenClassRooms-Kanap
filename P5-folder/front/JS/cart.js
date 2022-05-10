@@ -4,6 +4,7 @@ import { setPanier } from "./methodes.js";
 
 
 const POSTURL = "http://localhost:3000/api/products/order";
+
 let section = document.querySelector("#cart__items");
 let form = document.querySelector(".cart__order__form");
 let firstName = document.querySelector("#firstName");
@@ -25,25 +26,29 @@ class Contact {
 }
 
 
+// pour chaque élément de getDatas() => compare si l'ID de la data est égale à la valeur contenue dans le panier
+// si = alors display en HTML un produit correspondant à l'ID stocké en panier, les valeurs sont get depuis getDatas()
+// 
 
+function displayProduct(produitPanier, i, datas) {
+  
 
-// Divise l'objet reçu en chaque éléments à afficher et créé en HTML un produit avec les données reçues
+    for (let index = 0; index < datas.length; index++) {
+      
+       if (produitPanier[0] == datas[index]._id){ 
+      let color = produitPanier[1];
+      let quantité = produitPanier[2];
 
-function displayProduct(produitPanier, i) {
-  let objet = produitPanier[0];
-  let color = produitPanier[1];
-  let quantité = produitPanier[2];
-
-  section.innerHTML += `
+      section.innerHTML += `
     <article class="cart__item" data-id="${i}" data-color="{product-color}">
     <div class="cart__item__img">
-      <img src="${objet.imageUrl}" alt="Photographie d'un canapé">
+      <img src="${datas[index].imageUrl}" alt="Photographie d'un canapé">
     </div>
     <div class="cart__item__content">
       <div class="cart__item__content__description">
-        <h2>${objet.name}</h2>
+        <h2>${datas[index].name}</h2>
         <p>${color}</p>
-        <p>${objet.price} €</p>
+        <p ><span class='itemPrice'>${datas[index].price}</span> €</p>
       </div>
       <div class="cart__item__content__settings">
         <div class="cart__item__content__settings__quantity">
@@ -56,7 +61,8 @@ function displayProduct(produitPanier, i) {
       </div>
     </div>
   </article> 
-    `;
+    `;}
+    }
 }
 
 // Get le panier, appelle la méthode splice() sur l'élément séléctionné et reset le panier
@@ -77,21 +83,50 @@ function isCorrectQté(qté) {
   }
 }
 
-// additionne tout les 3èmes éléments de chaque produits dans le panier puis attribut le total à l'élément HTML
-// en bas de page
 
-function displayTotal() {
-  Panier = getPanier();
-  var elementPrix = document.querySelector("#totalPrice");
-  var elementQuantité = document.querySelector("#totalQuantity");
+// pour chaque .itemPrice HTML, vérifie si la quantité correspondante en localStorage > 1 
+// si oui augmente total de sa valeur innerText*qté
+// sinon total += la valeur affichée en innerText
+// return total
 
-  var prixTotal = 0;
+function getTotalPrix(){
+  let panier = getPanier()
+  let price = document.getElementsByClassName('itemPrice')
+  let total = 0
+ for (let index = 0; index < price.length; index++) {
+   if (panier[index][2] > 1){
+     let qté = panier[index][2]
+     total += parseInt(price[index].innerText)*qté
+   }
+   else {total += parseInt(price[index].innerText)}
+  //  console.log(price[index].innerText)
+   
+   
+ }
+  // console.log(total);
+  return total
+}
+
+// get le panier, additionne tout les 3èmes éléments de chaque produits dans le panier et return la donnée
+
+function getTotalQté(){
+  var Panier = getPanier();
   var articles = 0;
-
   for (let i = 0; i < Panier.length; i++) {
-    prixTotal += Panier[i][0].price * Panier[i][2];
     articles += 1 * Panier[i][2];
   }
+  return articles
+}
+
+// appelle getTotalQté() et getTotalPrix() et les display aux éléments HTML correspondants
+
+function displayTotal() {
+ 
+  var elementPrix = document.querySelector("#totalPrice");
+  var elementQuantité = document.querySelector("#totalQuantity");
+  var articles = getTotalQté()
+  var prixTotal = getTotalPrix()
+
   elementPrix.textContent = prixTotal;
   elementQuantité.textContent = articles;
 }
@@ -201,19 +236,16 @@ function postRequest(contact, products) {
     });
 }
 
-// get l'ID d'un produit
-
-function getPanierProductID(panierProduit) {
-  return panierProduit[0]._id;
-}
 
 // return une liste contenant tout les ID des produits dans le panier (ce que demande l'API)
 
 function panierToArray(Panier) {
   let array = [];
-  Panier.forEach((element) => {
-    array.push(getPanierProductID(element));
-  });
+  for (let index = 0; index < Panier.length; index++) {
+    array.push(Panier[index][0])
+    
+    
+  }
   return array;
 }
 
@@ -256,13 +288,18 @@ form.addEventListener("submit", (e) => {
     // orderNumber = postRequest(contact, products);
   }
 });
+// document.addEventListener("DOMContentLoaded", getTotalPrix)
 
-function main() {
+async function main() {
   let Panier = getPanier();
+  let datas = await getDatas()
   for (let i = 0; i < Panier.length; i++) {
-    displayProduct(Panier[i], i);
+    displayProduct(Panier[i], i, datas);
   }
+  // console.log(datas[1]._id);
   displayTotal();
+  getTotalPrix()
+  
 }
 
 main();
